@@ -9,12 +9,13 @@
   <a class="btn outline" href="{{ url_for('stages') }}">← Back</a>
 </div>
 
+<div class="p small" style="color:var(--muted);">Question <span id="q-num">1</span> of {{ questions|length }}</div>
 <div style="height:16px;"></div>
 
 <form method="post" action="{{ url_for('stage_submit') }}" id="quiz-form">
   {% for q in questions %}
     {% set qi = loop.index0 %}
-    <div class="quiz-chat-wrap" data-q="{{ qi }}">
+    <div class="quiz-chat-wrap{% if loop.first %} active{% endif %}" data-q="{{ qi }}">
       <div class="quiz-chat-header">Complete the chat</div>
 
       <div class="quiz-chat-row">
@@ -46,11 +47,14 @@
 
   <div class="quiz-chat-actions" style="background:#1a1d23;border-radius:22px;padding:20px;margin-top:16px;">
     <a href="{{ url_for('stages') }}" class="quiz-chat-skip">SKIP</a>
-    <button type="submit" class="quiz-chat-check">CHECK</button>
+    <button type="button" class="quiz-chat-check" id="check-btn" disabled style="opacity:0.5;cursor:not-allowed;">CHECK</button>
   </div>
 </form>
 
 <script>
+var totalQ = {{ questions|length }};
+var currentIdx = 0;
+
 document.querySelectorAll('.quiz-chat-opt').forEach(function(label) {
   label.addEventListener('click', function() {
     var q = this.dataset.q;
@@ -64,6 +68,40 @@ document.querySelectorAll('.quiz-chat-opt').forEach(function(label) {
       bubble.classList.add('has-answer');
     }
   });
+});
+
+function updateCheckBtn() {
+  var currentWrap = document.querySelector('.quiz-chat-wrap.active');
+  if (!currentWrap) return;
+  var qIdx = parseInt(currentWrap.dataset.q, 10);
+  var chosen = document.querySelector('input[name="q' + qIdx + '"]:checked');
+  var btn = document.getElementById('check-btn');
+  btn.disabled = !chosen;
+  btn.style.opacity = chosen ? '1' : '0.5';
+  btn.style.cursor = chosen ? 'pointer' : 'not-allowed';
+}
+
+document.querySelectorAll('.quiz-chat-opt').forEach(function(label) {
+  label.addEventListener('click', updateCheckBtn);
+});
+updateCheckBtn();
+
+document.getElementById('check-btn').addEventListener('click', function() {
+  if (this.disabled) return;
+  var currentWrap = document.querySelector('.quiz-chat-wrap.active');
+  var qIdx = parseInt(currentWrap.dataset.q, 10);
+  var chosen = document.querySelector('input[name="q' + qIdx + '"]:checked');
+  if (!chosen) return;
+  if (qIdx + 1 < totalQ) {
+    currentWrap.classList.remove('active');
+    var nextWrap = document.querySelector('.quiz-chat-wrap[data-q="' + (qIdx + 1) + '"]');
+    if (nextWrap) nextWrap.classList.add('active');
+    currentIdx = qIdx + 1;
+    document.getElementById('q-num').textContent = currentIdx + 1;
+    updateCheckBtn();
+  } else {
+    document.getElementById('quiz-form').submit();
+  }
 });
 </script>
 

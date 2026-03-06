@@ -1051,8 +1051,10 @@ def choose_grade():
     guard = require_login()
     if guard:
         return guard
-    if not session.get("needs_grade_pick"):
+    if not session.get("subject"):
         return redirect(url_for("choose_subject"))
+    if not session.get("needs_grade_pick"):
+        return redirect(url_for("stages"))
     return render_template("choose_grade.html")
 
 
@@ -1070,8 +1072,7 @@ def choose_grade_post():
     db.commit()
 
     session.pop("needs_grade_pick", None)
-    session.pop("subject", None)
-    return redirect(url_for("choose_subject"))
+    return redirect(url_for("stages"))
 
 
 @app.get("/choose-subject")
@@ -1081,8 +1082,6 @@ def choose_subject():
         return guard
     if session.get("role") != "student":
         return redirect(url_for("stages"))
-    if session.get("needs_grade_pick"):
-        return redirect(url_for("choose_grade"))
     return render_template("choose_subject.html", subjects=STAGE_SUBJECTS)
 
 
@@ -1096,6 +1095,8 @@ def choose_subject_post():
         subject = STAGE_SUBJECTS[0]
     session["subject"] = subject
     flash("Let's start learning " + subject + " 🌿")
+    if session.get("needs_grade_pick"):
+        return redirect(url_for("choose_grade"))
     return redirect(url_for("stages"))
 
 
@@ -1163,7 +1164,7 @@ def auth_firebase():
         return jsonify({"redirect": url_for("parent_dashboard")})
     if not row["grade"]:
         session["needs_grade_pick"] = True
-        return jsonify({"redirect": url_for("choose_grade")})
+        return jsonify({"redirect": url_for("choose_subject")})
     return jsonify({"redirect": url_for("stages")})
 
 
@@ -1184,10 +1185,10 @@ def stages():
     if session.get("role") == "parent":
         return redirect(url_for("parent_dashboard"))
 
-    if session.get("needs_grade_pick"):
-        return redirect(url_for("choose_grade"))
     if not session.get("subject"):
         return redirect(url_for("choose_subject"))
+    if session.get("needs_grade_pick"):
+        return redirect(url_for("choose_grade"))
 
     user_id = session["user_id"]
     grade = get_user_grade(user_id)
@@ -1239,7 +1240,8 @@ def stage_quiz(stage_name: str):
         return redirect(url_for("stages"))
 
     grade = get_user_grade(user_id)
-    questions = get_stage_questions(grade, subject, stage_name, n=10)
+    n_questions = 5 if stage_name == "easy" else 10
+    questions = get_stage_questions(grade, subject, stage_name, n=n_questions)
     if not questions:
         flash("No questions available for this stage yet.")
         return redirect(url_for("stages"))

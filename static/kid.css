@@ -427,7 +427,9 @@ a{color:inherit}
   border-radius:22px;
   padding:20px;
   margin-bottom:16px;
+  display:none;
 }
+.quiz-chat-wrap.active{display:block}
 .quiz-chat-header{
   color:#fff;
   font-size:16px;
