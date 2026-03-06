@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="card page-card">
+  <div class="page-head">
+    <div>
+      <div class="page-title">Choose your grade</div>
+      <div class="page-sub">EduBear will pick questions that match your grade.</div>
+    </div>
+  </div>
+
+  <form method="post" action="{{ url_for('ask_grade_post') }}">
+    <div class="grade-list">
+      <label class="grade-item g1">
+        <input type="radio" name="grade" value="1" required>
+        <div class="grade-text">Grade 1</div>
+      </label>
+
+      <label class="grade-item g2">
+        <input type="radio" name="grade" value="2" required>
+        <div class="grade-text">Grade 2</div>
+      </label>
+
+      <label class="grade-item g3">
+        <input type="radio" name="grade" value="3" required>
+        <div class="grade-text">Grade 3</div>
+      </label>
+
+      <label class="grade-item g4">
+        <input type="radio" name="grade" value="4" required>
+        <div class="grade-text">Grade 4</div>
+      </label>
+
+      <label class="grade-item g5">
+        <input type="radio" name="grade" value="5" required>
+        <div class="grade-text">Grade 5</div>
+      </label>
+    </div>
+
+    <div style="height:14px;"></div>
+    <button class="btn primary big block" type="submit">CONTINUE</button>
+  </form>
+</section>
+
+{% endblock %}

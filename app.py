@@ -296,6 +296,8 @@ def _ensure_db():
 def require_login():
     if "user_id" not in session:
         return redirect(url_for("login"))
+    if session.get("needs_grade_pick") and request.endpoint not in ("ask_grade", "ask_grade_post"):
+        return redirect(url_for("ask_grade"))
     return None
 
 
@@ -1052,9 +1054,9 @@ def choose_grade():
     guard = require_login()
     if guard:
         return guard
+    if not session.get("subject"):
+        return redirect(url_for("choose_subject"))
     if not session.get("needs_grade_pick"):
-        if not session.get("subject"):
-            return redirect(url_for("choose_subject"))
         return redirect(url_for("stages"))
     return render_template("choose_grade.html")
 
@@ -1073,8 +1075,7 @@ def choose_grade_post():
     db.commit()
 
     session.pop("needs_grade_pick", None)
-    flash("Thanks! Let's get started.")
-    return redirect(url_for("choose_subject"))
+    return redirect(url_for("stages"))
 
 
 @app.get("/choose-subject")
@@ -1084,8 +1085,6 @@ def choose_subject():
         return guard
     if session.get("role") != "student":
         return redirect(url_for("stages"))
-    if session.get("needs_grade_pick"):
-        return redirect(url_for("choose_grade"))
     return render_template("choose_subject.html", subjects=STAGE_SUBJECTS)
 
 
@@ -1099,6 +1098,8 @@ def choose_subject_post():
         subject = STAGE_SUBJECTS[0]
     session["subject"] = subject
     flash("Let's start learning " + subject + " 🌿")
+    if session.get("needs_grade_pick"):
+        return redirect(url_for("choose_grade"))
     return redirect(url_for("stages"))
 
 
@@ -1169,8 +1170,38 @@ def auth_firebase():
         return jsonify({"redirect": url_for("parent_dashboard")})
     if not row["grade"]:
         session["needs_grade_pick"] = True
-        return jsonify({"redirect": url_for("choose_grade")})
+        return jsonify({"redirect": url_for("ask_grade")})
     return jsonify({"redirect": url_for("stages")})
+
+
+@app.get("/ask-grade")
+def ask_grade():
+    guard = require_login()
+    if guard:
+        return guard
+    if session.get("role") != "student":
+        return redirect(url_for("stages"))
+    if not session.get("needs_grade_pick"):
+        return redirect(url_for("choose_subject") if not session.get("subject") else url_for("stages"))
+    return render_template("ask_grade.html")
+
+
+@app.post("/ask-grade")
+def ask_grade_post():
+    guard = require_login()
+    if guard:
+        return guard
+    grade_str = (request.form.get("grade") or "").strip()
+    if grade_str not in ("1", "2", "3", "4", "5"):
+        flash("Please select a grade.")
+        return redirect(url_for("ask_grade"))
+    grade = int(grade_str)
+    db = get_db()
+    db.execute("UPDATE users SET grade=? WHERE id=?", (grade, session["user_id"]))
+    db.commit()
+    session.pop("needs_grade_pick", None)
+    flash("Thanks! Let's get started.")
+    return redirect(url_for("choose_subject"))
 
 
 @app.get("/logout")
@@ -1190,10 +1221,10 @@ def stages():
     if session.get("role") == "parent":
         return redirect(url_for("parent_dashboard"))
 
-    if session.get("needs_grade_pick"):
-        return redirect(url_for("choose_grade"))
     if not session.get("subject"):
         return redirect(url_for("choose_subject"))
+    if session.get("needs_grade_pick"):
+        return redirect(url_for("ask_grade"))
 
     user_id = session["user_id"]
     grade = get_user_grade(user_id)
