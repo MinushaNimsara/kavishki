@@ -1,0 +1,6 @@
+firebase-credentials.json
+firebase-web-config.json
+.venv/
+__pycache__/
+*.pyc
+app.db

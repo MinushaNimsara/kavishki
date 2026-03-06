@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-page">
+  <div class="auth-shell">
+    <div class="auth-left">
+      <div class="mascot-wrap">
+        <img class="mascot" src="{{ url_for('static', filename='img/bear.png') }}" alt="EduBear mascot">
+        <div class="speech">Let’s go! ✨</div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-title">Create your EduBear account</div>
+      <div class="auth-sub">Make a gentle learning profile in seconds.</div>
+
+      <div style="height:14px;"></div>
+
+      <div class="card auth-card">
+        {% if firebase_config %}
+        <div class="field">
+          <button type="button" class="btn outline big block" id="firebase-google-btn">Sign up with Google</button>
+        </div>
+        <div class="field" style="text-align:center; color:var(--muted, #666);">or</div>
+
+        <form class="form" id="signup-form">
+          <div class="field">
+            <label class="label">Nickname</label>
+            <input class="input" name="nickname" required>
+          </div>
+
+          <div class="field">
+            <label class="label">Email</label>
+            <input class="input" name="email" type="email" required>
+          </div>
+
+          <div class="field">
+            <label class="label">Password</label>
+            <input class="input" name="password" type="password" required minlength="6">
+          </div>
+
+          <div class="field">
+            <label class="label">Account type</label>
+            <select class="input" name="role">
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+              <option value="parent">Parent</option>
+            </select>
+          </div>
+
+          <button class="btn primary big block" type="submit">GET STARTED</button>
+
+          <div class="legal">
+            By signing up for EduBear Learning System, you agree to our
+            <b>Terms</b> and <b>Privacy Policy</b>.
+          </div>
+        </form>
+        {% else %}
+        <p class="small" style="color:var(--muted,#666);">Configure firebase-web-config.json to sign up.</p>
+        {% endif %}
+      </div>
+
+      <div class="small center" style="margin-top:12px;">
+        Already have an account? <a href="{{ url_for('login') }}"><b>Log in</b></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+{% if firebase_config %}
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script>
+(function() {
+  var config = {{ firebase_config | tojson }};
+  firebase.initializeApp(config);
+  var authEndpoint = "{{ url_for('auth_firebase') }}";
+
+  function signUpWithToken(idToken, extra) {
+    var body = { token: idToken };
+    if (extra) { body.nickname = extra.nickname; body.role = extra.role; }
+    return fetch(authEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function(r) { return r.json(); });
+  }
+
+  var googleBtn = document.getElementById("firebase-google-btn");
+  if (googleBtn) {
+    googleBtn.addEventListener("click", function() {
+      googleBtn.disabled = true;
+      googleBtn.textContent = "Signing up...";
+      var roleSelect = document.querySelector("select[name=role]");
+      var nicknameInput = document.querySelector("input[name=nickname]");
+      var role = roleSelect ? roleSelect.value : "student";
+      var nickname = nicknameInput ? nicknameInput.value.trim() : "";
+      firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .then(function(r) { return r.user.getIdToken(); })
+        .then(function(t) { return signUpWithToken(t, { nickname: nickname || undefined, role: role }); })
+        .then(function(data) {
+          if (data.redirect) window.location.href = data.redirect;
+          else if (data.error) { googleBtn.disabled = false; googleBtn.textContent = "Sign up with Google"; alert(data.error); }
+        }).catch(function(err) {
+          googleBtn.disabled = false;
+          googleBtn.textContent = "Sign up with Google";
+          alert(err.message || "Sign-up failed");
+        });
+    });
+  }
+
+  var form = document.getElementById("signup-form");
+  if (form) {
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      var nickname = form.querySelector("[name=nickname]").value.trim();
+      var email = form.querySelector("[name=email]").value.trim();
+      var password = form.querySelector("[name=password]").value;
+      var role = form.querySelector("[name=role]").value;
+      var submitBtn = form.querySelector("button[type=submit]");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Creating account...";
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(function(r) { return r.user.getIdToken(); })
+        .then(function(t) { return signUpWithToken(t, { nickname: nickname, role: role }); })
+        .then(function(data) {
+          if (data.redirect) window.location.href = data.redirect;
+          else if (data.error) { submitBtn.disabled = false; submitBtn.textContent = "GET STARTED"; alert(data.error); }
+        }).catch(function(err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "GET STARTED";
+          alert(err.message || "Sign-up failed");
+        });
+    });
+  }
+})();
+</script>
+{% endif %}
+{% endblock %}

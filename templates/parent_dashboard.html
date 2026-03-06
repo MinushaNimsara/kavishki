@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="spread">
+  <div>
+    <div class="h1">Parent Dashboard 👨‍👩‍👧</div>
+    <div class="p">Monitor your child's learning progress</div>
+  </div>
+  <a class="btn outline" href="{{ url_for('subjects') }}">← Back</a>
+</div>
+
+<div style="height:16px;"></div>
+
+<div class="card soft">
+  <div class="h2">Link a Child</div>
+  <p class="p">Enter your child's account email to link and view their progress.</p>
+  <form method="post" action="{{ url_for('parent_link_child') }}" style="display:flex; gap:8px; margin-top:8px;">
+    <input class="input" name="child_email" type="email" placeholder="child@email.com" style="flex:1;">
+    <button class="btn primary" type="submit">Link</button>
+  </form>
+</div>
+
+<div style="height:16px;"></div>
+
+{% if children_data|length == 0 %}
+<div class="card">
+  <div class="p">No children linked yet. Add your child's email above.</div>
+</div>
+{% else %}
+{% for cd in children_data %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="h2">{{ cd.child.nickname }} — Grade {{ cd.child.grade }} · {{ cd.child.xp }} XP</div>
+  <div class="small" style="margin-top:4px;">Confidence: <b>{{ cd.confidence }}</b> · Risk: <b>{{ cd.risk_level }}</b> ({{ (cd.risk * 100)|round(0) }}%)</div>
+
+  <div style="margin-top:12px;">
+    <div class="small"><b>Topic mastery</b></div>
+    {% for m in cd.mastery %}
+    <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+      <span class="small">{{ m.key }}</span>
+      <div class="progress" style="flex:1; height:8px;">
+        <div class="progress-fill" data-progress="{{ (m.mastery * 100) }}"></div>
+      </div>
+      <span class="small">{{ (m.mastery * 100)|round(0) }}%</span>
+    </div>
+    {% else %}
+    <div class="small">No mastery data yet.</div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:12px;">
+    <div class="small"><b>Recent attempts</b></div>
+    {% for a in cd.attempts %}
+    <div class="card soft" style="margin-top:6px;">
+      <span class="small">{{ a.subject|title }} • {{ a.topic.replace('_',' ')|title }}</span>
+      <span class="badge blue">{{ a.correct_q }}/{{ a.total_q }}</span>
+      <span class="small">{{ a.created_at[:10] if a.created_at else '' }}</span>
+    </div>
+    {% else %}
+    <div class="small">No attempts yet.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,482 @@
+{
+  "vocabulary": {
+    "easy": [
+      {
+        "word": "happy",
+        "options": [
+          "sad",
+          "glad",
+          "angry",
+          "tired"
+        ],
+        "answer": "glad",
+        "hint": "It means feeling good."
+      },
+      {
+        "word": "big",
+        "options": [
+          "small",
+          "large",
+          "tiny",
+          "short"
+        ],
+        "answer": "large",
+        "hint": "It means not small."
+      },
+      {
+        "word": "fast",
+        "options": [
+          "quick",
+          "slow",
+          "late",
+          "soft"
+        ],
+        "answer": "quick",
+        "hint": "It means moving quickly."
+      },
+      {
+        "word": "begin",
+        "options": [
+          "start",
+          "stop",
+          "sleep",
+          "laugh"
+        ],
+        "answer": "start",
+        "hint": "It means to start."
+      },
+      {
+        "word": "quiet",
+        "options": [
+          "silent",
+          "noisy",
+          "bright",
+          "heavy"
+        ],
+        "answer": "silent",
+        "hint": "It means not loud."
+      }
+    ],
+    "medium": [
+      {
+        "word": "careful",
+        "options": [
+          "risky",
+          "cautious",
+          "lazy",
+          "weak"
+        ],
+        "answer": "cautious",
+        "hint": "It means doing something safely."
+      },
+      {
+        "word": "return",
+        "options": [
+          "leave",
+          "come back",
+          "forget",
+          "break"
+        ],
+        "answer": "come back",
+        "hint": "It means to come back."
+      },
+      {
+        "word": "choose",
+        "options": [
+          "pick",
+          "throw",
+          "hide",
+          "burn"
+        ],
+        "answer": "pick",
+        "hint": "It means select one."
+      },
+      {
+        "word": "answer",
+        "options": [
+          "reply",
+          "question",
+          "silence",
+          "mistake"
+        ],
+        "answer": "reply",
+        "hint": "It means respond."
+      },
+      {
+        "word": "strong",
+        "options": [
+          "powerful",
+          "soft",
+          "thin",
+          "late"
+        ],
+        "answer": "powerful",
+        "hint": "It means having power."
+      }
+    ],
+    "hard": [
+      {
+        "word": "discover",
+        "options": [
+          "find",
+          "lose",
+          "sell",
+          "copy"
+        ],
+        "answer": "find",
+        "hint": "It means to find something new."
+      },
+      {
+        "word": "observe",
+        "options": [
+          "watch",
+          "ignore",
+          "push",
+          "build"
+        ],
+        "answer": "watch",
+        "hint": "It means to watch carefully."
+      },
+      {
+        "word": "increase",
+        "options": [
+          "grow",
+          "drop",
+          "hide",
+          "break"
+        ],
+        "answer": "grow",
+        "hint": "It means to become more."
+      },
+      {
+        "word": "reduce",
+        "options": [
+          "decrease",
+          "decorate",
+          "dance",
+          "divide"
+        ],
+        "answer": "decrease",
+        "hint": "It means to make less."
+      },
+      {
+        "word": "important",
+        "options": [
+          "valuable",
+          "ordinary",
+          "tiny",
+          "sleepy"
+        ],
+        "answer": "valuable",
+        "hint": "It means it matters a lot."
+      }
+    ]
+  },
+  "grammar": {
+    "easy": [
+      {
+        "q": "She ___ to school.",
+        "options": [
+          "go",
+          "goes",
+          "going",
+          "gone"
+        ],
+        "answer": "goes",
+        "hint": "He/She/It usually takes -s."
+      },
+      {
+        "q": "They ___ happy.",
+        "options": [
+          "is",
+          "are",
+          "am",
+          "be"
+        ],
+        "answer": "are",
+        "hint": "They → are."
+      },
+      {
+        "q": "I ___ a book.",
+        "options": [
+          "have",
+          "has",
+          "having",
+          "had"
+        ],
+        "answer": "have",
+        "hint": "I/You/We/They → have."
+      },
+      {
+        "q": "An ___ is red.",
+        "options": [
+          "banana",
+          "apple",
+          "chair",
+          "dog"
+        ],
+        "answer": "apple",
+        "hint": "Use 'an' before vowel sound."
+      },
+      {
+        "q": "We ___ football.",
+        "options": [
+          "play",
+          "plays",
+          "playing",
+          "played"
+        ],
+        "answer": "play",
+        "hint": "We → base verb."
+      }
+    ],
+    "medium": [
+      {
+        "q": "He ___ not like milk.",
+        "options": [
+          "do",
+          "does",
+          "did",
+          "doing"
+        ],
+        "answer": "does",
+        "hint": "He/She/It → does."
+      },
+      {
+        "q": "The cats ___ sleeping.",
+        "options": [
+          "is",
+          "are",
+          "was",
+          "be"
+        ],
+        "answer": "are",
+        "hint": "Plural → are."
+      },
+      {
+        "q": "I ___ my homework yesterday.",
+        "options": [
+          "do",
+          "did",
+          "does",
+          "doing"
+        ],
+        "answer": "did",
+        "hint": "Yesterday → past tense."
+      },
+      {
+        "q": "There ___ two pencils on the table.",
+        "options": [
+          "is",
+          "are",
+          "was",
+          "be"
+        ],
+        "answer": "are",
+        "hint": "Two → plural."
+      },
+      {
+        "q": "She ___ a story now.",
+        "options": [
+          "reads",
+          "read",
+          "is reading",
+          "reading"
+        ],
+        "answer": "is reading",
+        "hint": "Now → present continuous."
+      }
+    ],
+    "hard": [
+      {
+        "q": "If it rains, we ___ inside.",
+        "options": [
+          "stay",
+          "stayed",
+          "will stay",
+          "staying"
+        ],
+        "answer": "will stay",
+        "hint": "If + present, will + verb."
+      },
+      {
+        "q": "He has ___ his keys.",
+        "options": [
+          "lose",
+          "lost",
+          "losing",
+          "loss"
+        ],
+        "answer": "lost",
+        "hint": "Present perfect uses past participle."
+      },
+      {
+        "q": "The book ___ by my friend.",
+        "options": [
+          "wrote",
+          "was written",
+          "is write",
+          "writing"
+        ],
+        "answer": "was written",
+        "hint": "Passive voice."
+      },
+      {
+        "q": "Neither of the answers ___ correct.",
+        "options": [
+          "are",
+          "is",
+          "be",
+          "were"
+        ],
+        "answer": "is",
+        "hint": "Neither → singular (school rule)."
+      },
+      {
+        "q": "She is taller ___ her brother.",
+        "options": [
+          "then",
+          "than",
+          "that",
+          "to"
+        ],
+        "answer": "than",
+        "hint": "Comparison uses 'than'."
+      }
+    ]
+  },
+  "reading": {
+    "passages": [
+      {
+        "id": "r1",
+        "text": "Mina has a small garden. She waters the plants every morning. The flowers are bright and colorful.",
+        "q": "What does Mina do every morning?",
+        "options": [
+          "She waters the plants",
+          "She buys flowers",
+          "She paints the garden",
+          "She eats flowers"
+        ],
+        "answer": "She waters the plants",
+        "hint": "Find 'every morning'."
+      },
+      {
+        "id": "r2",
+        "text": "Sam and Tom ride their bicycles to the park. They play on the swings and slide. After playing, they drink water.",
+        "q": "Where do Sam and Tom go?",
+        "options": [
+          "To the park",
+          "To school",
+          "To a shop",
+          "To the beach"
+        ],
+        "answer": "To the park",
+        "hint": "They ride to a place."
+      },
+      {
+        "id": "r3",
+        "text": "A turtle moves slowly. It has a hard shell that protects its body. The turtle can pull its head inside the shell.",
+        "q": "What protects the turtle?",
+        "options": [
+          "Its shell",
+          "Its tail",
+          "Its legs",
+          "Its eyes"
+        ],
+        "answer": "Its shell",
+        "hint": "Look for 'protects'."
+      },
+      {
+        "id": "r4",
+        "text": "Nila found a lost puppy. The puppy was hungry, so Nila gave it food. Then she helped the puppy find its owner.",
+        "q": "Why did Nila give food to the puppy?",
+        "options": [
+          "Because it was hungry",
+          "Because it was angry",
+          "Because it was tired",
+          "Because it was noisy"
+        ],
+        "answer": "Because it was hungry",
+        "hint": "It says 'hungry'."
+      },
+      {
+        "id": "r5",
+        "text": "Rain falls from clouds. When the sun comes out, puddles can dry. This happens because the water turns into vapor.",
+        "q": "What makes puddles dry?",
+        "options": [
+          "The sun",
+          "The moon",
+          "The wind only",
+          "The stars"
+        ],
+        "answer": "The sun",
+        "hint": "When the sun comes out."
+      },
+      {
+        "id": "r6",
+        "text": "Arun likes to read science books. He learns about plants, animals, and space. Reading helps him discover new ideas.",
+        "q": "What does Arun learn about?",
+        "options": [
+          "Plants, animals, and space",
+          "Only football",
+          "Only cooking",
+          "Only music"
+        ],
+        "answer": "Plants, animals, and space",
+        "hint": "Look at the list."
+      },
+      {
+        "id": "r7",
+        "text": "Lina packed her bag for school. She put in a pencil, a notebook, and an eraser. She was ready to learn.",
+        "q": "What did Lina put in her bag?",
+        "options": [
+          "A pencil, a notebook, and an eraser",
+          "A toy and a ball",
+          "A phone and a charger",
+          "Only a lunch box"
+        ],
+        "answer": "A pencil, a notebook, and an eraser",
+        "hint": "The items are listed."
+      },
+      {
+        "id": "r8",
+        "text": "A magnet can pull some metals. It can attract iron. Wood and plastic are not attracted to a magnet.",
+        "q": "Which metal is attracted to a magnet?",
+        "options": [
+          "Iron",
+          "Plastic",
+          "Wood",
+          "Paper"
+        ],
+        "answer": "Iron",
+        "hint": "The passage names it."
+      },
+      {
+        "id": "r9",
+        "text": "Birds build nests to keep their eggs safe. Many birds use sticks and leaves. The nest is their home.",
+        "q": "Why do birds build nests?",
+        "options": [
+          "To keep eggs safe",
+          "To make noise",
+          "To grow flowers",
+          "To catch fish"
+        ],
+        "answer": "To keep eggs safe",
+        "hint": "First sentence explains."
+      },
+      {
+        "id": "r10",
+        "text": "Sweets taste good, but too many sweets are not healthy. Eating fruits and vegetables helps the body stay strong.",
+        "q": "What helps the body stay strong?",
+        "options": [
+          "Fruits and vegetables",
+          "Only sweets",
+          "Only chips",
+          "Only ice cream"
+        ],
+        "answer": "Fruits and vegetables",
+        "hint": "Last sentence."
+      }
+    ]
+  }
+}

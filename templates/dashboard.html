@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="spread">
+  <div>
+    <div class="h1">My Growth 🌱</div>
+    <div class="p">XP {{ user['xp'] }} • Streak {{ streak }} day(s)</div>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <a class="btn outline" href="{{ url_for('subjects') }}">← Back</a>
+    <a class="btn outline small" href="{{ url_for('ml_train') }}">🤖 Train ML</a>
+  </div>
+</div>
+
+{% if badges|length > 0 %}
+<div style="height:12px;"></div>
+<div class="card soft">
+  <div class="h2">🏆 Badges</div>
+  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+    {% for b in badges %}
+    <span class="badge" title="{{ b.desc }}">{{ b.emoji }} {{ b.name }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div style="height:12px;"></div>
+
+<div class="card soft">
+  <div class="h2">🤖 Smart Tip</div>
+  <div class="p">Next: <b>{{ ml_rec_subject|title }}</b> → {{ ml_rec_topic|replace('_',' ')|title }} — {{ ml_rec_reason }}</div>
+  <div class="small" style="margin-top:6px;">Confidence: {{ confidence }} • Risk: {{ risk_level }}</div>
+</div>
+
+<div style="height:12px;"></div>
+
+<div class="card">
+  <div class="h2">Your topic levels</div>
+  <div class="p">These show how you’re growing in each topic.</div>
+
+  <div style="height:12px;"></div>
+
+  {% for t in topics %}
+    {% set progress = (t.mastery * 100) | round(0) %}
+    {% set wk = weakness_labels.get(t.subject ~ ':' ~ t.topic, 'Moderate') %}
+    <div style="margin-bottom:12px;">
+      <div class="spread">
+        <div class="small"><b class="text-capitalize">{{ t.subject }}</b> • {{ t.topic.replace('_',' ') }}</div>
+        <div>
+          <span class="badge blue">{{ t.growth }}</span>
+          <span class="badge {% if wk == 'Weak' %}gray{% elif wk == 'Strong' %}blue{% else %}gray{% endif %}">{{ wk }}</span>
+        </div>
+      </div>
+      <div class="progress">
+        <div class="progress-fill" data-progress="{{ progress }}"></div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div style="height:12px;"></div>
+
+<div class="card">
+  <div class="h2">Progress Chart</div>
+  <div style="height:200px;"><canvas id="progressChart"></canvas></div>
+</div>
+
+<div style="height:12px;"></div>
+
+<div class="card">
+  <div class="h2">Recent practice</div>
+
+  {% if attempts|length == 0 %}
+    <div class="p">No practice yet. Start with a subject 🌿</div>
+  {% else %}
+    <div class="grid" style="gap:10px; margin-top:10px;">
+      {% for a in attempts %}
+        <div class="card soft">
+          <div class="spread">
+            <div class="small"><b class="text-capitalize">{{ a.subject }}</b> • {{ a.topic.replace('_',' ') }}</div>
+            <span class="badge gray">{{ a.created_at[:10] }}</span>
+          </div>
+          <div class="p">Score: <b>{{ a.correct_q }}/{{ a.total_q }}</b> • Level: <b class="text-capitalize">{{ a.difficulty }}</b></div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  fetch("{{ url_for('analytics_student', user_id=session.get('user_id', 0)) }}")
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) return;
+      new Chart(document.getElementById("progressChart"), {
+        type: "line",
+        data: {
+          labels: data.labels || [],
+          datasets: [
+            { label: "Score %", data: data.scores || [], borderColor: "#22c55e", fill: false },
+            { label: "Time (s)", data: data.times || [], borderColor: "#3b82f6", fill: false, yAxisID: "y1" }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 0, max: 100 },
+            y1: { position: "right", min: 0 }
+          }
+        }
+      });
+    })
+    .catch(() => {});
+});
+</script>

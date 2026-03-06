@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- # HEADER CARD -->
+<section class="card page-card">
+  <div class="hello-row">
+    <div>
+      <div class="hello-title">Hi, {{ user.nickname }}! 👋</div>
+      <div class="hello-meta">
+        Grade {{ user.grade }} • Streak {{ streak }} day(s)
+      </div>
+      <div class="hello-meta">
+        🎯 Today: <b>{{ weakest|title }}</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sp"></div>
+
+<!-- # SMART HELPER (notification style) -->
+<section class="notice">
+  <div class="notice-icon">🤖</div>
+  <div class="notice-body">
+    <div class="notice-title">Smart Helper</div>
+    <div class="notice-text">
+      Recommended: <b>{{ ml_rec_subject|title }}</b> → {{ ml_rec_topic|replace('_',' ')|title }}<br>
+      <span class="small">{{ ml_rec_reason }}</span>
+      Let’s grow <b>{{ weakest|title }}</b> today 🌱
+    </div>
+    <a class="btn outline small" href="{{ url_for('path', subject=ml_rec_subject) }}" style="margin-top:8px;">Go there</a>
+  </div>
+</section>
+
+<div class="sp"></div>
+
+<!-- # SUBJECT CARDS -->
+<div class="subject-grid">
+  {% for s in subjects %}
+    {% set prog = ((subject_scores[s] or 0) * 100) %}
+    <div class="card subject-card">
+      <div class="subject-top">
+        <div>
+          <div class="subject-name">{{ s|title }}</div>
+          {% if s == weakest %}
+            <div class="tag">Recommended</div>
+          {% else %}
+            <div class="tag muted">Practice</div>
+          {% endif %}
+          <div class="small">Progress: {{ prog|round(0) }}%</div>
+        </div>
+
+        <a class="btn primary" href="{{ url_for('path', subject=s) }}">Continue ▶</a>
+      </div>
+
+      <div class="progress">
+        <div class="progress-fill" data-progress="{{ prog }}"></div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

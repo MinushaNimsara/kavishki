@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="spread">
+  <div>
+    <div class="h1">Question Management</div>
+    <div class="p">Add, edit, or disable questions</div>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <a class="btn outline" href="{{ url_for('teacher_dashboard') }}">← Back</a>
+    <a class="btn primary" href="{{ url_for('admin_question_add') }}">+ Add Question</a>
+  </div>
+</div>
+
+<div style="height:16px;"></div>
+
+{% if questions|length == 0 %}
+<div class="card">
+  <div class="p">No admin questions yet. Add questions to supplement the JSON question bank.</div>
+</div>
+{% else %}
+<div class="card">
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid #e5e7eb;">
+          <th style="text-align:left; padding:8px;">Subject</th>
+          <th style="text-align:left; padding:8px;">Topic</th>
+          <th style="text-align:left; padding:8px;">Difficulty</th>
+          <th style="text-align:left; padding:8px;">Question</th>
+          <th style="text-align:left; padding:8px;">Status</th>
+          <th style="text-align:left; padding:8px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in questions %}
+        <tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:8px;">{{ q.subject }}</td>
+          <td style="padding:8px;">{{ q.topic }}</td>
+          <td style="padding:8px;">{{ q.difficulty }}</td>
+          <td style="padding:8px; max-width:200px; overflow:hidden; text-overflow:ellipsis;">{{ q.q_text[:60] }}{% if q.q_text|length > 60 %}...{% endif %}</td>
+          <td style="padding:8px;">{% if q.disabled %}<span class="badge gray">Disabled</span>{% else %}<span class="badge blue">Active</span>{% endif %}</td>
+          <td style="padding:8px;">
+            {% if q.disabled %}
+            <form method="post" action="{{ url_for('admin_question_enable', qid=q.id) }}" style="display:inline;">
+              <button type="submit" class="btn outline small">Enable</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('admin_question_disable', qid=q.id) }}" style="display:inline;">
+              <button type="submit" class="btn outline small">Disable</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

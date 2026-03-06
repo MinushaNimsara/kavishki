@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="spread">
+  <div class="h1">Add Question</div>
+  <a class="btn outline" href="{{ url_for('admin_questions') }}">← Back</a>
+</div>
+
+<div style="height:16px;"></div>
+
+<div class="card">
+  <form method="post" action="{{ url_for('admin_question_add_post') }}">
+    <div class="field">
+      <label class="label">Subject</label>
+      <select class="input" name="subject" required>
+        <option value="Mathematics">Mathematics</option>
+        <option value="English">English</option>
+        <option value="Science">Science</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">Topic</label>
+      <input class="input" name="topic" placeholder="e.g. addition, vocabulary, plants" required>
+    </div>
+    <div class="field">
+      <label class="label">Difficulty</label>
+      <select class="input" name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">Question text</label>
+      <textarea class="input" name="q_text" rows="3" required></textarea>
+    </div>
+    <div class="field">
+      <label class="label">Options (JSON array, e.g. ["A", "B", "C", "D"])</label>
+      <input class="input" name="options" value='["A", "B", "C", "D"]' placeholder='["opt1", "opt2", "opt3", "opt4"]'>
+    </div>
+    <div class="field">
+      <label class="label">Correct answer</label>
+      <input class="input" name="answer" required>
+    </div>
+    <div class="field">
+      <label class="label">Hint (optional)</label>
+      <input class="input" name="hint">
+    </div>
+    <button type="submit" class="btn primary">Add Question</button>
+  </form>
+</div>
+
+{% endblock %}

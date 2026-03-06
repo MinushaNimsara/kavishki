@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="page-top">
+  <a class="btn outline" href="{{ url_for('subjects') }}">← Back</a>
+
+  <div class="page-headline">
+    <div class="page-kicker">Subject</div>
+    <div class="page-title">{{ subject|title }}</div>
+    <div class="page-sub">Finish one topic to unlock the next 🌿</div>
+  </div>
+</section>
+
+<div class="sp"></div>
+
+<div class="topic-list">
+  {% for item in items %}
+    {% set pct = (item.mastery*100) %}
+    <div class="card topic-card">
+      <div class="topic-row">
+        <div>
+          <div class="topic-name">{{ item.topic|replace('_',' ')|title }}</div>
+          <div class="topic-meta">{{ item.growth }}</div>
+          <div class="small">Progress: {{ pct|round(0) }}%</div>
+        </div>
+
+        {% if item.unlocked %}
+          <a class="btn primary" href="{{ url_for('lesson', subject=subject, topic=item.topic) }}">Open</a>
+        {% else %}
+          <div class="btn lock">Locked 🔒</div>
+        {% endif %}
+      </div>
+
+      <div class="progress">
+        <div class="progress-fill" data-progress="{{ pct }}"></div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

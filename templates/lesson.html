@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="spread">
+  <a class="btn outline" href="{{ url_for('path', subject=subject) }}">← Path</a>
+  <span class="badge">💡 Small lesson</span>
+</div>
+
+<div style="height:12px;"></div>
+
+<div class="card">
+  <div class="h1">{{ topic.replace('_',' ')|capitalize }}</div>
+  <div class="p">No pressure. Learn gently 🌿</div>
+
+  <div style="height:12px;"></div>
+  <div class="card soft">
+    <div class="p">{{ lesson_text }}</div>
+  </div>
+
+  <div style="height:12px;"></div>
+  <a class="btn primary block" href="{{ url_for('practice', subject=subject, topic=topic) }}">✨ Start practice</a>
+</div>
+
+{% endblock %}

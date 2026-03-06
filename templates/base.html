@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or "EduBear Learning System" }}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='kid.css') }}">
+</head>
+<body>
+
+<!-- # NAVBAR -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="{{ url_for('subjects') }}">
+      <img class="brand-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="EduBear logo">
+      <div class="brand-text">
+        <div class="brand-name">EduBear</div>
+        <div class="brand-sub">Learning System</div>
+      </div>
+    </a>
+
+    {% if session.get('user_id') %}
+      <div class="nav-actions">
+        {% if session.get('role') == 'teacher' %}
+        <a class="btn outline" href="{{ url_for('teacher_dashboard') }}">📋 Teacher</a>
+        {% elif session.get('role') == 'parent' %}
+        <a class="btn outline" href="{{ url_for('parent_dashboard') }}">👨‍👩‍👧 Parent</a>
+        {% else %}
+        <a class="btn outline" href="{{ url_for('dashboard') }}">📈 My Growth</a>
+        {% endif %}
+        <a class="btn danger" href="{{ url_for('logout') }}">Logout</a>
+      </div>
+    {% else %}
+      <div class="nav-actions">
+        <a class="btn outline" href="{{ url_for('login') }}">Login</a>
+        <a class="btn primary" href="{{ url_for('signup') }}">Sign up</a>
+      </div>
+    {% endif %}
+  </div>
+</header>
+
+<!-- # PAGE -->
+<main class="container">
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="toast">{{ messages[0] }}</div>
+      <div style="height:10px;"></div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<!-- # PROGRESS BAR WIDTH -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".progress-fill").forEach(function (el) {
+    const p = parseFloat(el.getAttribute("data-progress")) || 0;
+    el.style.width = Math.max(0, Math.min(100, p)) + "%";
+  });
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,254 @@
+[
+  {
+    "subject": "science",
+    "topic": "plants",
+    "difficulty": "easy",
+    "q": "Which part of a plant absorbs water from the soil?",
+    "options": [
+      "Roots",
+      "Leaves",
+      "Flower",
+      "Fruit"
+    ],
+    "answer": "Roots",
+    "hint": "It is under the ground."
+  },
+  {
+    "subject": "science",
+    "topic": "plants",
+    "difficulty": "easy",
+    "q": "What do leaves make for the plant using sunlight?",
+    "options": [
+      "Food",
+      "Sand",
+      "Plastic",
+      "Stone"
+    ],
+    "answer": "Food",
+    "hint": "Plants make their own food."
+  },
+  {
+    "subject": "science",
+    "topic": "plants",
+    "difficulty": "easy",
+    "q": "Which part of a plant holds it upright?",
+    "options": [
+      "Stem",
+      "Root",
+      "Leaf",
+      "Seed"
+    ],
+    "answer": "Stem",
+    "hint": "It supports the plant."
+  },
+  {
+    "subject": "science",
+    "topic": "plants",
+    "difficulty": "medium",
+    "q": "Which of these is needed for photosynthesis?",
+    "options": [
+      "Sunlight",
+      "Chocolate",
+      "Paper",
+      "Smoke"
+    ],
+    "answer": "Sunlight",
+    "hint": "Energy from the sun."
+  },
+  {
+    "subject": "science",
+    "topic": "plants",
+    "difficulty": "medium",
+    "q": "A seed grows into a new plant. What is this called?",
+    "options": [
+      "Germination",
+      "Evaporation",
+      "Melting",
+      "Rusting"
+    ],
+    "answer": "Germination",
+    "hint": "Seed begins to grow."
+  },
+  {
+    "subject": "science",
+    "topic": "plants",
+    "difficulty": "hard",
+    "q": "Which gas do plants take in during photosynthesis?",
+    "options": [
+      "Carbon dioxide",
+      "Oxygen",
+      "Helium",
+      "Nitrogen"
+    ],
+    "answer": "Carbon dioxide",
+    "hint": "Humans breathe out this."
+  },
+  {
+    "subject": "science",
+    "topic": "animals",
+    "difficulty": "easy",
+    "q": "Which animal is a mammal?",
+    "options": [
+      "Dog",
+      "Snake",
+      "Frog",
+      "Fish"
+    ],
+    "answer": "Dog",
+    "hint": "Mammals feed milk."
+  },
+  {
+    "subject": "science",
+    "topic": "animals",
+    "difficulty": "easy",
+    "q": "Which body part helps birds fly?",
+    "options": [
+      "Wings",
+      "Fins",
+      "Hooves",
+      "Gills"
+    ],
+    "answer": "Wings",
+    "hint": "Birds flap them."
+  },
+  {
+    "subject": "science",
+    "topic": "animals",
+    "difficulty": "easy",
+    "q": "Fish breathe using ___.",
+    "options": [
+      "Gills",
+      "Lungs",
+      "Skin only",
+      "Roots"
+    ],
+    "answer": "Gills",
+    "hint": "On sides of head."
+  },
+  {
+    "subject": "science",
+    "topic": "animals",
+    "difficulty": "medium",
+    "q": "Which animal is an amphibian?",
+    "options": [
+      "Frog",
+      "Cat",
+      "Eagle",
+      "Shark"
+    ],
+    "answer": "Frog",
+    "hint": "Lives on land and water."
+  },
+  {
+    "subject": "science",
+    "topic": "animals",
+    "difficulty": "medium",
+    "q": "Herbivores mostly eat ___.",
+    "options": [
+      "Plants",
+      "Meat",
+      "Metal",
+      "Plastic"
+    ],
+    "answer": "Plants",
+    "hint": "Herb means plant."
+  },
+  {
+    "subject": "science",
+    "topic": "animals",
+    "difficulty": "hard",
+    "q": "Which group of animals has feathers?",
+    "options": [
+      "Birds",
+      "Reptiles",
+      "Fish",
+      "Insects"
+    ],
+    "answer": "Birds",
+    "hint": "Parrots and eagles."
+  },
+  {
+    "subject": "science",
+    "topic": "matter_forces",
+    "difficulty": "easy",
+    "q": "Ice is a ___.",
+    "options": [
+      "Solid",
+      "Liquid",
+      "Gas",
+      "Light"
+    ],
+    "answer": "Solid",
+    "hint": "It keeps its shape."
+  },
+  {
+    "subject": "science",
+    "topic": "matter_forces",
+    "difficulty": "easy",
+    "q": "Water in a cup is a ___.",
+    "options": [
+      "Liquid",
+      "Solid",
+      "Gas",
+      "Rock"
+    ],
+    "answer": "Liquid",
+    "hint": "Takes shape of cup."
+  },
+  {
+    "subject": "science",
+    "topic": "matter_forces",
+    "difficulty": "easy",
+    "q": "Pushing and pulling are types of ___.",
+    "options": [
+      "Forces",
+      "Colors",
+      "Plants",
+      "Sounds"
+    ],
+    "answer": "Forces",
+    "hint": "They make things move."
+  },
+  {
+    "subject": "science",
+    "topic": "matter_forces",
+    "difficulty": "medium",
+    "q": "When water turns into water vapor, it is called ___.",
+    "options": [
+      "Evaporation",
+      "Freezing",
+      "Condensation",
+      "Cutting"
+    ],
+    "answer": "Evaporation",
+    "hint": "When water dries."
+  },
+  {
+    "subject": "science",
+    "topic": "matter_forces",
+    "difficulty": "medium",
+    "q": "Which is an example of a push?",
+    "options": [
+      "Closing a door",
+      "Pulling a rope",
+      "Lifting a bag",
+      "Listening to music"
+    ],
+    "answer": "Closing a door",
+    "hint": "Move away from you."
+  },
+  {
+    "subject": "science",
+    "topic": "matter_forces",
+    "difficulty": "hard",
+    "q": "Which state of matter spreads out to fill a container?",
+    "options": [
+      "Gas",
+      "Solid",
+      "Liquid",
+      "Wood"
+    ],
+    "answer": "Gas",
+    "hint": "Air is an example."
+  }
+]

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% set percent = ((correct / (total if total else 1)) * 100) | round(0) %}
+{% set celebrate = (percent >= 80) %}
+{% set fail = (percent < 50) %}
+
+<div class="card">
+  {% if celebrate %}
+    <div class="h1">Yayyy! You did amazing! 🎉</div>
+    <div class="p">You got {{ correct }}/{{ total }} ({{ percent }}%). Keep going gently 🌿</div>
+  {% elif fail %}
+    <div class="h1">Oh no 😢</div>
+    <div class="p">You got {{ correct }}/{{ total }} ({{ percent }}%). It’s okay — we try again softly 💛</div>
+  {% else %}
+    <div class="h1">Good try 🙂</div>
+    <div class="p">You got {{ correct }}/{{ total }} ({{ percent }}%). You are improving step by step 🌱</div>
+  {% endif %}
+
+  <div style="height:12px;"></div>
+
+  <div class="center">
+    {% if celebrate %}
+      <div class="bear big">🐻👏</div>
+      <div class="small">You’re getting stronger every time ✨</div>
+    {% elif fail %}
+      <div class="bear">🐻😭</div>
+      <div class="small">It’s okay to make mistakes 💛</div>
+      <div style="height:6px;"></div>
+      <div class="small">💔 Don’t give up. Try easy questions first.</div>
+    {% else %}
+      <div class="bear">🐻🙂</div>
+      <div class="small">Nice work. Let’s practice gently 🌿</div>
+    {% endif %}
+  </div>
+
+  <div style="height:12px;"></div>
+
+  <div class="grid cols-3">
+    <div class="card soft">
+      <div class="small">Score</div>
+      <div class="h2">{{ correct }}/{{ total }}</div>
+    </div>
+
+    <div class="card soft">
+      <div class="small">Your level</div>
+      <div class="h2">{{ level_text }}</div>
+      <div class="small">{{ feeling_text }}</div>
+    </div>
+
+    <div class="card soft">
+      <div class="small">Next practice</div>
+      <div class="h2 text-capitalize">{{ next_diff }}</div>
+      <div class="small">Questions: {{ next_n }}</div>
+    </div>
+  </div>
+
+  <div style="height:12px;"></div>
+
+  <div class="card soft">
+    <div class="h2">🤖 Why the app chose this</div>
+    <div class="p">{{ ai_explain }}</div>
+    <div style="height:6px;"></div>
+    <div class="small">{{ subject_note }}</div>
+  </div>
+
+  {% if revision_suggested %}
+  <div style="height:12px;"></div>
+  <div class="card soft" style="border-left:4px solid #f59e0b;">
+    <div class="h2">📚 Revision suggested</div>
+    <div class="p">This topic needs more practice. Try an easy revision set to build confidence.</div>
+    <a class="btn outline" href="{{ url_for('practice', subject=subject, topic=topic, revision=1, n=4) }}">📖 Do revision quiz</a>
+  </div>
+  {% endif %}
+
+  <div style="height:12px;"></div>
+
+  {% if next_action[0] == 'next_topic' %}
+    <a class="btn primary block" href="{{ url_for('lesson', subject=subject, topic=next_action[1]) }}">🚀 Next topic</a>
+  {% else %}
+    <a class="btn primary block" href="{{ url_for('practice', subject=subject, topic=topic, n=next_n) }}">🌿 Practice again</a>
+  {% endif %}
+
+  <div style="height:10px;"></div>
+  <div class="center"><a class="small" href="{{ url_for('path', subject=subject) }}">Back to path</a></div>
+</div>
+
+{% if celebrate %}
+<script>
+(function () {
+  const colors = ["#22c55e", "#60a5fa", "#f59e0b", "#fb7185", "#a78bfa"];
+  const pieces = 90;
+  for (let i = 0; i < pieces; i++) {
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    p.style.left = (Math.random() * 100) + "vw";
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDuration = (1.4 + Math.random() * 1.6) + "s";
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3000);
+  }
+})();
+</script>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="spread">
+  <div>
+    <div class="h1">Teacher Dashboard 📋</div>
+    <div class="p">Manage students and view reports</div>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <a class="btn outline" href="{{ url_for('subjects') }}">← Back</a>
+    <a class="btn outline" href="{{ url_for('admin_questions') }}">📝 Manage Questions</a>
+    <a class="btn primary" href="{{ url_for('ml_train') }}">🤖 Train ML Model</a>
+  </div>
+</div>
+
+{% if risk_alerts|length > 0 %}
+<div style="height:16px;"></div>
+<div class="card soft" style="border-left:4px solid #ef4444;">
+  <div class="h2">⚠️ Risk Alerts</div>
+  <div class="p">Students who may need intervention:</div>
+  {% for r in risk_alerts %}
+  <div class="card soft" style="margin-top:8px;">
+    <b>{{ r.nickname }}</b> — Risk: {{ (r.risk * 100)|round(0) }}%
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if common_mistakes|length > 0 %}
+<div style="height:16px;"></div>
+<div class="card soft">
+  <div class="h2">Common Mistakes Report</div>
+  <div class="p">Topics where students struggle (low scores):</div>
+  <table style="width:100%; margin-top:8px;">
+    <thead><tr style="border-bottom:1px solid #e5e7eb;"><th style="text-align:left; padding:4px;">Subject</th><th style="text-align:left; padding:4px;">Topic</th><th style="text-align:left; padding:4px;">Difficulty</th><th style="text-align:left; padding:4px;">Fail Count</th><th style="text-align:left; padding:4px;">Avg Acc %</th></tr></thead>
+    <tbody>
+    {% for m in common_mistakes %}
+    <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:4px;">{{ m.subject|title }}</td><td style="padding:4px;">{{ m.topic|replace('_',' ')|title }}</td><td style="padding:4px;">{{ m.difficulty }}</td><td style="padding:4px;">{{ m.fail_count }}</td><td style="padding:4px;">{{ (m.avg_acc * 100)|round(0) if m.avg_acc else 0 }}%</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div style="height:16px;"></div>
+
+<div class="card soft">
+  <div class="h2">Question Bank Status</div>
+  <div class="p">Science: {{ science_questions }} questions from JSON. English topics: {{ english_topics|join(", ") or "none" }}.</div>
+  <div class="small">Edit data/science_questions.json and data/english_bank.json to manage questions.</div>
+</div>
+
+<div style="height:16px;"></div>
+
+<div class="card">
+  <div class="h2">Students</div>
+  {% if students|length == 0 %}
+  <div class="p">No students yet. Students sign up with role "Student".</div>
+  {% else %}
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid #e5e7eb;">
+          <th style="text-align:left; padding:8px;">Nickname</th>
+          <th style="text-align:left; padding:8px;">Grade</th>
+          <th style="text-align:left; padding:8px;">XP</th>
+          <th style="text-align:left; padding:8px;">Attempts</th>
+          <th style="text-align:left; padding:8px;">Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:8px;">{{ s.nickname }}</td>
+          <td style="padding:8px;">{{ s.grade }}</td>
+          <td style="padding:8px;">{{ s.xp }}</td>
+          <td style="padding:8px;">{{ s.attempt_count }}</td>
+          <td style="padding:8px;"><span class="badge {% if s.risk_level == 'high' %}gray{% elif s.risk_level == 'medium' %}blue{% else %}blue{% endif %}">{{ s.risk_level }} ({{ (s.risk_score * 100)|round(0) }}%)</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div style="height:16px;"></div>
+
+<div class="card">
+  <div class="h2">Recent Quiz Attempts</div>
+  {% if recent_attempts|length == 0 %}
+  <div class="p">No quiz attempts yet.</div>
+  {% else %}
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid #e5e7eb;">
+          <th style="text-align:left; padding:8px;">Student</th>
+          <th style="text-align:left; padding:8px;">Subject</th>
+          <th style="text-align:left; padding:8px;">Topic</th>
+          <th style="text-align:left; padding:8px;">Score</th>
+          <th style="text-align:left; padding:8px;">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in recent_attempts %}
+        <tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:8px;">{{ a.nickname }}</td>
+          <td style="padding:8px;">{{ a.subject|title }}</td>
+          <td style="padding:8px;">{{ a.topic.replace('_',' ')|title }}</td>
+          <td style="padding:8px;">{{ a.correct_q }}/{{ a.total_q }}</td>
+          <td style="padding:8px;">{{ a.created_at[:10] if a.created_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
