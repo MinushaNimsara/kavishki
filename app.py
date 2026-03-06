@@ -350,6 +350,69 @@ def is_stage_unlocked(user_id: int, subject: str, stage: str) -> bool:
     return get_stage_completed(user_id, subject, prev_stage)
 
 
+def get_ai_suggestions(
+    user_id: int,
+    subject: str,
+    grade: int,
+    streak: int,
+    stage_items: List[Dict],
+) -> List[Dict[str, str]]:
+    """
+    Analyze student data and return personalized AI suggestions.
+    Returns list of {icon, text} dicts.
+    """
+    suggestions = []
+    completed = [i for i in stage_items if i["completed"]]
+    ready = [i for i in stage_items if i["unlocked"] and not i["completed"]]
+    locked = [i for i in stage_items if not i["unlocked"]]
+
+    # Streak motivation
+    if streak >= 3:
+        suggestions.append({"icon": "🔥", "text": f"Amazing! You're on a {streak}-day streak. Keep it going!"})
+    elif streak >= 1:
+        suggestions.append({"icon": "🌟", "text": f"Nice! You've practiced {streak} day(s) in a row. Come back tomorrow!"})
+
+    # Stage-based suggestions
+    if completed and ready:
+        next_stage = ready[0]
+        suggestions.append({
+            "icon": "📖",
+            "text": f"Ready for the next challenge? Try the {next_stage['label']} stage in {subject}.",
+        })
+    elif completed and not ready and locked:
+        suggestions.append({
+            "icon": "🎯",
+            "text": "You've completed all unlocked stages! Keep practicing to strengthen your skills.",
+        })
+    elif completed:
+        suggestions.append({
+            "icon": "🎉",
+            "text": f"Great job completing all stages in {subject}! You're a star learner.",
+        })
+    elif ready:
+        stage = ready[0]
+        suggestions.append({
+            "icon": "✨",
+            "text": f"Start the {stage['label']} stage to keep learning {subject}.",
+        })
+    else:
+        suggestions.append({
+            "icon": "📚",
+            "text": f"Begin with the Easy stage to start your {subject} journey!",
+        })
+
+    # Score-based tips
+    for item in stage_items:
+        if item["total"] > 0 and item["pct"] < 100 and item["unlocked"] and not item["completed"]:
+            suggestions.append({
+                "icon": "💪",
+                "text": f"Get 100% on {item['label']} to unlock the next stage. You're at {int(item['pct'])}%.",
+            })
+            break
+
+    return suggestions[:3]  # Limit to 3 suggestions
+
+
 def get_stage_questions(grade: int, subject: str, stage: str, n: int = 10) -> List[Dict]:
     db = get_db()
     rows = db.execute(
@@ -1254,12 +1317,16 @@ def stages():
             "pct": pct,
         })
 
+    ai_suggestions = get_ai_suggestions(user_id, subject, grade, streak, stage_items)
+
     return render_template(
         "stages.html",
         user=user,
+        grade=grade,
         streak=streak,
         subject=subject,
         stage_items=stage_items,
+        ai_suggestions=ai_suggestions,
     )
 
 

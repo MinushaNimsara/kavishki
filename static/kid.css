@@ -405,6 +405,16 @@ a{color:inherit}
 }
 
 /* =========================
+# 11b) AI SUGGESTIONS (stages dashboard)
+========================= */
+.ai-suggestions{background:linear-gradient(135deg,rgba(224,242,254,.4),rgba(254,243,199,.3));border-color:rgba(96,165,250,.15)}
+.suggestion-list{display:flex;flex-direction:column;gap:10px}
+.suggestion-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(31,41,55,.06)}
+.suggestion-item:last-child{border-bottom:0}
+.suggestion-icon{font-size:20px;flex-shrink:0}
+.suggestion-text{font-size:15px;line-height:1.5;color:var(--ink);font-weight:600}
+
+/* =========================
 # 12) PROGRESS BARS
 ========================= */
 .progress{

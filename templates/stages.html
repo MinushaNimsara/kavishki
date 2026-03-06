@@ -6,12 +6,27 @@
     <div>
       <div class="hello-title">Hi, {{ user.nickname }}! 👋</div>
       <div class="hello-meta">
-        Grade {{ user.grade }} • {{ subject }} • Streak {{ streak }} day(s)
+        Grade {{ grade }} • {{ subject }} • Streak {{ streak }} day(s)
       </div>
     </div>
     <a class="btn outline small" href="{{ url_for('choose_subject') }}">Change subject</a>
   </div>
 </section>
+
+{% if ai_suggestions %}
+<div class="sp"></div>
+<section class="card page-card ai-suggestions">
+  <div class="page-title" style="margin-bottom:12px;">🤖 AI suggestions</div>
+  <div class="suggestion-list">
+    {% for s in ai_suggestions %}
+    <div class="suggestion-item">
+      <span class="suggestion-icon">{{ s.icon }}</span>
+      <span class="suggestion-text">{{ s.text }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 <div class="sp"></div>
 
