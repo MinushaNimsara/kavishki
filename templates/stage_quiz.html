@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="spread">
+  <div>
+    <div class="h1">Stage: {{ stage|capitalize }} ✨</div>
+    <div class="p">Answer all questions correctly to unlock the next stage!</div>
+  </div>
+  <a class="btn outline" href="{{ url_for('stages') }}">← Back</a>
+</div>
+
+<div style="height:12px;"></div>
+
+<form method="post" action="{{ url_for('stage_submit') }}">
+  {% for q in questions %}
+    {% set qi = loop.index0 %}
+    <div class="card" style="margin-bottom:12px;">
+      <div class="h2">Q{{ loop.index }}.</div>
+      <div class="p" style="white-space:pre-line; color:var(--ink);">{{ q.q }}</div>
+
+      <div style="height:10px;"></div>
+
+      <div class="grid cols-2">
+        {% for opt in q.options %}
+          <label class="option">
+            <input type="radio" name="q{{ qi }}" value="{{ opt }}" required>
+            <div><b>{{ opt }}</b></div>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+
+  <button class="btn primary block" type="submit">🏁 Finish</button>
+</form>
+
+{% endblock %}

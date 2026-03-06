@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="card page-card">
+  <div class="hello-row">
+    <div>
+      <div class="hello-title">Hi, {{ user.nickname }}! 👋</div>
+      <div class="hello-meta">
+        Grade {{ user.grade }} • Streak {{ streak }} day(s)
+      </div>
+      <div class="hello-meta">
+        Complete each stage with 100% to unlock the next 🌿
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sp"></div>
+
+<div class="topic-list">
+  {% for item in stage_items %}
+    <div class="card topic-card">
+      <div class="topic-row">
+        <div>
+          <div class="topic-name">Stage: {{ item.label }}</div>
+          {% if item.completed %}
+            <div class="tag" style="background:#dcfce7;color:#166534;">✓ Completed</div>
+          {% elif item.unlocked %}
+            <div class="tag">Ready</div>
+          {% else %}
+            <div class="tag muted">Locked 🔒</div>
+          {% endif %}
+        </div>
+
+        {% if item.unlocked and not item.completed %}
+          <a class="btn primary" href="{{ url_for('stage_quiz', stage_name=item.stage) }}">Start</a>
+        {% elif item.completed %}
+          <div class="btn" style="background:#dcfce7;color:#166534;">Done ✓</div>
+        {% else %}
+          <div class="btn lock">Locked 🔒</div>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% set percent = ((correct / (total if total else 1)) * 100) | round(0) %}
+
+<div class="card">
+  <div class="h1">Almost there! 💪</div>
+  <div class="p">You got {{ correct }}/{{ total }} ({{ percent }}%). You need 100% to unlock the next stage. Try again!</div>
+
+  <div style="height:12px;"></div>
+
+  <div class="center">
+    <div class="bear">🐻💛</div>
+    <div class="small">Don't give up. You can do it!</div>
+  </div>
+
+  <div style="height:12px;"></div>
+
+  <div class="grid cols-1">
+    <div class="card soft">
+      <div class="small">Score</div>
+      <div class="h2">{{ correct }}/{{ total }}</div>
+      <div class="small">Need {{ total }}/{{ total }} to pass</div>
+    </div>
+  </div>
+
+  <div style="height:12px;"></div>
+
+  <a class="btn primary block" href="{{ url_for('stage_quiz', stage_name=stage) }}">🔄 Try again</a>
+
+  <div style="height:10px;"></div>
+  <div class="center"><a class="small" href="{{ url_for('stages') }}">Back to stages</a></div>
+</div>
+
+{% endblock %}
