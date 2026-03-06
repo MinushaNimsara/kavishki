@@ -1114,8 +1114,11 @@ def login():
 @app.post("/auth/firebase")
 def auth_firebase():
     """Verify Firebase ID token and create session. Accepts JSON {token, nickname?, role?}."""
+    def err(msg, code=500):
+        return jsonify({"error": msg}), code
+
     if not FIREBASE_ENABLED:
-        return jsonify({"error": "Firebase not configured"}), 503
+        return err("Firebase not configured", 503)
 
     data = request.get_json(silent=True) or {}
     id_token = data.get("token") or request.form.get("token")
@@ -1157,11 +1160,15 @@ def auth_firebase():
         else:
             user_id = db.execute("SELECT id FROM users WHERE firebase_uid=?", (firebase_uid,)).fetchone()["id"]
 
-    row = db.execute("SELECT grade, role, age FROM users WHERE id=?", (user_id,)).fetchone()
+    try:
+        row = db.execute("SELECT grade, role, age FROM users WHERE id=?", (user_id,)).fetchone()
+    except sqlite3.OperationalError:
+        row = db.execute("SELECT grade, role FROM users WHERE id=?", (user_id,)).fetchone()
     session["user_id"] = int(user_id)
     session["role"] = (row["role"] if row["role"] else "student")
 
-    if row.get("age") is None:
+    age_val = row["age"] if "age" in row.keys() else None
+    if age_val is None:
         session["needs_age_pick"] = True
         return jsonify({"redirect": url_for("ask_age")})
 
