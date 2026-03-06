@@ -3,35 +3,68 @@
 
 <div class="spread">
   <div>
-    <div class="h1">Stage: {{ stage|capitalize }} ✨</div>
-    <div class="p">Answer all questions correctly to unlock the next stage!</div>
+    <div class="h1">{{ subject }} — Stage: {{ stage|capitalize }} ✨</div>
+    <div class="p">Complete each chat and answer all correctly to unlock the next stage!</div>
   </div>
   <a class="btn outline" href="{{ url_for('stages') }}">← Back</a>
 </div>
 
-<div style="height:12px;"></div>
+<div style="height:16px;"></div>
 
-<form method="post" action="{{ url_for('stage_submit') }}">
+<form method="post" action="{{ url_for('stage_submit') }}" id="quiz-form">
   {% for q in questions %}
     {% set qi = loop.index0 %}
-    <div class="card" style="margin-bottom:12px;">
-      <div class="h2">Q{{ loop.index }}.</div>
-      <div class="p" style="white-space:pre-line; color:var(--ink);">{{ q.q }}</div>
+    <div class="quiz-chat-wrap" data-q="{{ qi }}">
+      <div class="quiz-chat-header">Complete the chat</div>
 
-      <div style="height:10px;"></div>
+      <div class="quiz-chat-row">
+        <div class="quiz-chat-avatar left">🧒</div>
+        <div class="quiz-chat-bubble left">
+          <span class="quiz-chat-speaker">🔊</span>{{ q.q }}
+        </div>
+      </div>
 
-      <div class="grid cols-2">
+      <div class="quiz-chat-row right">
+        <div class="quiz-chat-avatar right">👧</div>
+        <div class="quiz-chat-bubble right" id="answer-bubble-{{ qi }}">
+          <span class="answer-placeholder">Select your answer below</span>
+          <span class="answer-text" style="display:none;"></span>
+        </div>
+      </div>
+
+      <div class="quiz-chat-options">
         {% for opt in q.options %}
-          <label class="option">
+          <label class="quiz-chat-opt" data-opt="{{ opt }}" data-q="{{ qi }}">
             <input type="radio" name="q{{ qi }}" value="{{ opt }}" required>
-            <div><b>{{ opt }}</b></div>
+            <span class="quiz-chat-opt-num">{{ loop.index }}</span>
+            <span class="quiz-chat-opt-text">{{ opt }}</span>
           </label>
         {% endfor %}
       </div>
     </div>
   {% endfor %}
 
-  <button class="btn primary block" type="submit">🏁 Finish</button>
+  <div class="quiz-chat-actions" style="background:#1a1d23;border-radius:22px;padding:20px;margin-top:16px;">
+    <a href="{{ url_for('stages') }}" class="quiz-chat-skip">SKIP</a>
+    <button type="submit" class="quiz-chat-check">CHECK</button>
+  </div>
 </form>
+
+<script>
+document.querySelectorAll('.quiz-chat-opt').forEach(function(label) {
+  label.addEventListener('click', function() {
+    var q = this.dataset.q;
+    var opt = this.dataset.opt;
+    var bubble = document.getElementById('answer-bubble-' + q);
+    if (bubble) {
+      bubble.querySelector('.answer-placeholder').style.display = 'none';
+      var textEl = bubble.querySelector('.answer-text');
+      textEl.textContent = opt;
+      textEl.style.display = 'inline';
+      bubble.classList.add('has-answer');
+    }
+  });
+});
+</script>
 
 {% endblock %}

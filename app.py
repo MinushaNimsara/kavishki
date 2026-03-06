@@ -98,11 +98,40 @@ def _map_level_to_stage(level: str) -> str:
     return "hard"
 
 
+STAGE_SUBJECTS = ["Math", "English", "Science", "General Knowledge"]
+
+
 def _import_stage_questions(db) -> None:
     """Import questions from CSV. Clear admin_questions first."""
     db.execute("DELETE FROM admin_questions")
     db.execute("DELETE FROM mastery")
     db.execute("DELETE FROM attempts")
+    db.execute("DROP TABLE IF EXISTS stage_progress")
+    db.execute("DROP TABLE IF EXISTS stage_questions")
+    db.execute("""
+        CREATE TABLE stage_questions(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          grade INTEGER NOT NULL,
+          subject TEXT NOT NULL,
+          stage TEXT NOT NULL,
+          q_text TEXT NOT NULL,
+          option_a TEXT NOT NULL,
+          option_b TEXT NOT NULL,
+          option_c TEXT NOT NULL,
+          option_d TEXT NOT NULL,
+          answer TEXT NOT NULL
+        )
+    """)
+    db.execute("""
+        CREATE TABLE stage_progress(
+          user_id INTEGER NOT NULL,
+          subject TEXT NOT NULL,
+          stage TEXT NOT NULL,
+          completed INTEGER NOT NULL DEFAULT 0,
+          completed_at TEXT,
+          PRIMARY KEY (user_id, subject, stage)
+        )
+    """)
     csv_path = os.path.join(DATA_DIR, "questions.csv")
     if not os.path.exists(csv_path):
         return
@@ -110,6 +139,7 @@ def _import_stage_questions(db) -> None:
         reader = csv.DictReader(f)
         for row in reader:
             grade = int(row.get("grade", 1))
+            subject = row.get("subject", "Math")
             stage = _map_level_to_stage(row.get("level", "Easy"))
             q_text = row.get("question", "")
             opt_a = row.get("optionA", "")
@@ -120,8 +150,8 @@ def _import_stage_questions(db) -> None:
             ans_map = {"A": opt_a, "B": opt_b, "C": opt_c, "D": opt_d}
             answer = ans_map.get(ans_letter, opt_a)
             db.execute(
-                "INSERT INTO stage_questions(grade, stage, q_text, option_a, option_b, option_c, option_d, answer) VALUES(?,?,?,?,?,?,?,?)",
-                (grade, stage, q_text, opt_a, opt_b, opt_c, opt_d, answer)
+                "INSERT INTO stage_questions(grade, subject, stage, q_text, option_a, option_b, option_c, option_d, answer) VALUES(?,?,?,?,?,?,?,?,?)",
+                (grade, subject, stage, q_text, opt_a, opt_b, opt_c, opt_d, answer)
             )
 
 
@@ -215,6 +245,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS stage_questions(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       grade INTEGER NOT NULL,
+      subject TEXT NOT NULL,
       stage TEXT NOT NULL,
       q_text TEXT NOT NULL,
       option_a TEXT NOT NULL,
@@ -226,10 +257,11 @@ def init_db():
 
     CREATE TABLE IF NOT EXISTS stage_progress(
       user_id INTEGER NOT NULL,
+      subject TEXT NOT NULL,
       stage TEXT NOT NULL,
       completed INTEGER NOT NULL DEFAULT 0,
       completed_at TEXT,
-      PRIMARY KEY (user_id, stage)
+      PRIMARY KEY (user_id, subject, stage)
     );
     """)
     # Migrate: add role, parent_id, firebase_uid to users if missing
@@ -241,9 +273,14 @@ def init_db():
         except sqlite3.OperationalError:
             pass  # column already exists
 
-    # Load stage questions from CSV if empty
+    # Load stage questions from CSV if empty or schema outdated (no subject column)
+    try:
+        db.execute("SELECT subject FROM stage_questions LIMIT 1")
+        has_subject = True
+    except sqlite3.OperationalError:
+        has_subject = False
     count = db.execute("SELECT COUNT(*) as c FROM stage_questions").fetchone()["c"]
-    if count == 0:
+    if count == 0 or not has_subject:
         _import_stage_questions(db)
 
     db.commit()
@@ -271,35 +308,50 @@ def get_user_grade(user_id: int) -> int:
 STAGES = ["easy", "medium", "hard"]
 
 
-def get_stage_completed(user_id: int, stage: str) -> bool:
+def get_stage_completed(user_id: int, subject: str, stage: str) -> bool:
     db = get_db()
-    row = db.execute("SELECT completed FROM stage_progress WHERE user_id=? AND stage=?", (user_id, stage)).fetchone()
+    row = db.execute("SELECT completed FROM stage_progress WHERE user_id=? AND subject=? AND stage=?", (user_id, subject, stage)).fetchone()
     return bool(row and row["completed"])
 
 
-def set_stage_completed(user_id: int, stage: str) -> None:
+def set_stage_completed(user_id: int, subject: str, stage: str) -> None:
     db = get_db()
     db.execute(
-        "INSERT INTO stage_progress(user_id, stage, completed, completed_at) VALUES(?,?,1,?) "
-        "ON CONFLICT(user_id, stage) DO UPDATE SET completed=1, completed_at=excluded.completed_at",
-        (user_id, stage, datetime.utcnow().isoformat())
+        "INSERT INTO stage_progress(user_id, subject, stage, completed, completed_at) VALUES(?,?,?,1,?) "
+        "ON CONFLICT(user_id, subject, stage) DO UPDATE SET completed=1, completed_at=excluded.completed_at",
+        (user_id, subject, stage, datetime.utcnow().isoformat())
     )
     db.commit()
 
 
-def is_stage_unlocked(user_id: int, stage: str) -> bool:
+def get_stage_best_score(user_id: int, subject: str, stage: str) -> Tuple[int, int, float]:
+    """Returns (correct, total, percentage) for best attempt. (0, 0, 0) if no attempts."""
+    db = get_db()
+    rows = db.execute(
+        "SELECT correct_q, total_q FROM attempts WHERE user_id=? AND subject=? AND topic=? AND total_q>0 ORDER BY (1.0*correct_q/total_q) DESC LIMIT 1",
+        (user_id, subject, stage)
+    ).fetchall()
+    if not rows:
+        return 0, 0, 0.0
+    r = rows[0]
+    c, t = int(r["correct_q"]), int(r["total_q"])
+    pct = round(100 * c / t, 0) if t else 0
+    return c, t, float(pct)
+
+
+def is_stage_unlocked(user_id: int, subject: str, stage: str) -> bool:
     if stage == "easy":
         return True
     idx = STAGES.index(stage) if stage in STAGES else 0
     prev_stage = STAGES[idx - 1]
-    return get_stage_completed(user_id, prev_stage)
+    return get_stage_completed(user_id, subject, prev_stage)
 
 
-def get_stage_questions(grade: int, stage: str, n: int = 10) -> List[Dict]:
+def get_stage_questions(grade: int, subject: str, stage: str, n: int = 10) -> List[Dict]:
     db = get_db()
     rows = db.execute(
-        "SELECT id, q_text, option_a, option_b, option_c, option_d, answer FROM stage_questions WHERE grade=? AND stage=? ORDER BY RANDOM() LIMIT ?",
-        (grade, stage, n)
+        "SELECT id, q_text, option_a, option_b, option_c, option_d, answer FROM stage_questions WHERE grade=? AND subject=? AND stage=? ORDER BY RANDOM() LIMIT ?",
+        (grade, subject, stage, n)
     ).fetchall()
     out = []
     for r in rows:
@@ -1000,7 +1052,7 @@ def choose_grade():
     if guard:
         return guard
     if not session.get("needs_grade_pick"):
-        return redirect(url_for("stages"))
+        return redirect(url_for("choose_subject"))
     return render_template("choose_grade.html")
 
 
@@ -1018,7 +1070,32 @@ def choose_grade_post():
     db.commit()
 
     session.pop("needs_grade_pick", None)
-    flash("Grade saved! Let’s start learning 🌿")
+    session.pop("subject", None)
+    return redirect(url_for("choose_subject"))
+
+
+@app.get("/choose-subject")
+def choose_subject():
+    guard = require_login()
+    if guard:
+        return guard
+    if session.get("role") != "student":
+        return redirect(url_for("stages"))
+    if session.get("needs_grade_pick"):
+        return redirect(url_for("choose_grade"))
+    return render_template("choose_subject.html", subjects=STAGE_SUBJECTS)
+
+
+@app.post("/choose-subject")
+def choose_subject_post():
+    guard = require_login()
+    if guard:
+        return guard
+    subject = request.form.get("subject", "").strip()
+    if subject not in STAGE_SUBJECTS:
+        subject = STAGE_SUBJECTS[0]
+    session["subject"] = subject
+    flash("Let's start learning " + subject + " 🌿")
     return redirect(url_for("stages"))
 
 
@@ -1109,6 +1186,8 @@ def stages():
 
     if session.get("needs_grade_pick"):
         return redirect(url_for("choose_grade"))
+    if not session.get("subject"):
+        return redirect(url_for("choose_subject"))
 
     user_id = session["user_id"]
     grade = get_user_grade(user_id)
@@ -1116,21 +1195,27 @@ def stages():
     user = db.execute("SELECT nickname, grade, xp FROM users WHERE id=?", (user_id,)).fetchone()
     streak = get_streak(user_id)
 
+    subject = session.get("subject", "Math")
     stage_items = []
     for s in STAGES:
-        unlocked = is_stage_unlocked(user_id, s)
-        completed = get_stage_completed(user_id, s)
+        unlocked = is_stage_unlocked(user_id, subject, s)
+        completed = get_stage_completed(user_id, subject, s)
+        correct, total, pct = get_stage_best_score(user_id, subject, s)
         stage_items.append({
             "stage": s,
             "label": s.capitalize(),
             "unlocked": unlocked,
             "completed": completed,
+            "correct": correct,
+            "total": total,
+            "pct": pct,
         })
 
     return render_template(
         "stages.html",
         user=user,
         streak=streak,
+        subject=subject,
         stage_items=stage_items,
     )
 
@@ -1140,29 +1225,33 @@ def stage_quiz(stage_name: str):
     guard = require_login()
     if guard:
         return guard
+    if not session.get("subject"):
+        return redirect(url_for("choose_subject"))
     if stage_name not in STAGES:
         return redirect(url_for("stages"))
     if session.get("role") != "student":
         return redirect(url_for("stages"))
 
+    subject = session["subject"]
     user_id = session["user_id"]
-    if not is_stage_unlocked(user_id, stage_name):
+    if not is_stage_unlocked(user_id, subject, stage_name):
         flash("Complete the previous stage first to unlock this one.")
         return redirect(url_for("stages"))
 
     grade = get_user_grade(user_id)
-    questions = get_stage_questions(grade, stage_name, n=10)
+    questions = get_stage_questions(grade, subject, stage_name, n=10)
     if not questions:
         flash("No questions available for this stage yet.")
         return redirect(url_for("stages"))
 
     session["active_stage_quiz"] = {
+        "subject": subject,
         "stage": stage_name,
         "grade": grade,
         "questions": questions,
         "started_at": datetime.utcnow().timestamp(),
     }
-    return render_template("stage_quiz.html", stage=stage_name, questions=questions)
+    return render_template("stage_quiz.html", stage=stage_name, subject=subject, questions=questions)
 
 
 @app.post("/stage/submit")
@@ -1182,11 +1271,12 @@ def stage_submit():
     total = len(questions)
     perfect = (correct == total)
 
+    subject = quiz.get("subject", session.get("subject", "Math"))
     db = get_db()
     db.execute(
         "INSERT INTO attempts(user_id, subject, topic, difficulty, total_q, correct_q, started_at, ended_at, hints_used, created_at) "
         "VALUES(?,?,?,?,?,?,?,?,0,?)",
-        (user_id, "Stage", stage, stage, total, correct,
+        (user_id, subject, stage, stage, total, correct,
          quiz.get("started_at", datetime.utcnow().timestamp()),
          datetime.utcnow().timestamp(), datetime.utcnow().isoformat())
     )
@@ -1197,7 +1287,7 @@ def stage_submit():
     session.pop("active_stage_quiz", None)
 
     if perfect:
-        set_stage_completed(user_id, stage)
+        set_stage_completed(user_id, subject, stage)
         if stage == "hard":
             return redirect(url_for("congrats"))
         flash("Perfect! You unlocked the next stage.")
@@ -1206,6 +1296,7 @@ def stage_submit():
     return render_template(
         "stage_result.html",
         stage=stage,
+        subject=subject,
         correct=correct,
         total=total,
         perfect=False,
@@ -1218,10 +1309,11 @@ def congrats():
     if guard:
         return guard
     user_id = session["user_id"]
-    if not get_stage_completed(user_id, "hard"):
+    subject = session.get("subject", "Math")
+    if not get_stage_completed(user_id, subject, "hard"):
         return redirect(url_for("stages"))
     user = get_db().execute("SELECT nickname FROM users WHERE id=?", (user_id,)).fetchone()
-    return render_template("congrats.html", user=user)
+    return render_template("congrats.html", user=user, subject=subject)
 
 
 @app.get("/subjects")

@@ -6,12 +6,13 @@
     <div>
       <div class="hello-title">Hi, {{ user.nickname }}! 👋</div>
       <div class="hello-meta">
-        Grade {{ user.grade }} • Streak {{ streak }} day(s)
+        Grade {{ user.grade }} • {{ subject }} • Streak {{ streak }} day(s)
       </div>
       <div class="hello-meta">
         Complete each stage with 100% to unlock the next 🌿
       </div>
     </div>
+    <a class="btn outline small" href="{{ url_for('choose_subject') }}">Change subject</a>
   </div>
 </section>
 
@@ -30,6 +31,7 @@
           {% else %}
             <div class="tag muted">Locked 🔒</div>
           {% endif %}
+          <div class="small" style="margin-top:4px;">Score: {% if item.total > 0 %}{{ item.pct|int }}% ({{ item.correct }}/{{ item.total }}){% else %}—{% endif %}</div>
         </div>
 
         {% if item.unlocked and not item.completed %}
