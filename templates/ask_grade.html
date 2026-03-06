@@ -11,30 +11,12 @@
 
   <form method="post" action="{{ url_for('ask_grade_post') }}">
     <div class="grade-list">
-      <label class="grade-item g1">
-        <input type="radio" name="grade" value="1" required>
-        <div class="grade-text">Grade 1</div>
+      {% for g in [1,2,3,4,5] %}
+      <label class="grade-item g{{ g }}">
+        <input type="radio" name="grade" value="{{ g }}" {{ 'checked' if (current_grade|default(1)) == g else '' }} required>
+        <div class="grade-text">Grade {{ g }}</div>
       </label>
-
-      <label class="grade-item g2">
-        <input type="radio" name="grade" value="2" required>
-        <div class="grade-text">Grade 2</div>
-      </label>
-
-      <label class="grade-item g3">
-        <input type="radio" name="grade" value="3" required>
-        <div class="grade-text">Grade 3</div>
-      </label>
-
-      <label class="grade-item g4">
-        <input type="radio" name="grade" value="4" required>
-        <div class="grade-text">Grade 4</div>
-      </label>
-
-      <label class="grade-item g5">
-        <input type="radio" name="grade" value="5" required>
-        <div class="grade-text">Grade 5</div>
-      </label>
+      {% endfor %}
     </div>
 
     <div style="height:14px;"></div>

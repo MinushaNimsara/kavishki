@@ -1184,9 +1184,12 @@ def ask_grade():
         return guard
     if session.get("role") != "student":
         return redirect(url_for("stages"))
-    if not session.get("needs_grade_pick"):
-        return redirect(url_for("choose_subject") if not session.get("subject") else url_for("stages"))
-    return render_template("ask_grade.html")
+    # If they already have subject, go to stages. Otherwise show grade (grade before subject).
+    if session.get("subject"):
+        return redirect(url_for("stages"))
+    user_id = session["user_id"]
+    grade = get_user_grade(user_id) or 1
+    return render_template("ask_grade.html", current_grade=grade)
 
 
 @app.post("/ask-grade")
