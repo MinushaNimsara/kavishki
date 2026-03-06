@@ -17,13 +17,19 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 FIREBASE_CRED_PATH = os.path.join(APP_DIR, "firebase-credentials.json")
 FIREBASE_WEB_CONFIG_PATH = os.path.join(APP_DIR, "firebase-web-config.json")
+IS_VERCEL = os.environ.get("VERCEL") == "1"
 
 # Initialize Firebase Admin (backend token verification)
 try:
     import firebase_admin
     from firebase_admin import credentials, auth as firebase_auth
-    if os.path.exists(FIREBASE_CRED_PATH):
+    cred = None
+    cred_json = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+    if cred_json:
+        cred = credentials.Certificate(json.loads(cred_json))
+    elif os.path.exists(FIREBASE_CRED_PATH):
         cred = credentials.Certificate(FIREBASE_CRED_PATH)
+    if cred:
         firebase_admin.initialize_app(cred)
         FIREBASE_ENABLED = True
     else:
@@ -34,17 +40,25 @@ except Exception:
 
 def get_firebase_web_config():
     """Load Firebase web config for frontend. Returns None if missing/invalid."""
-    if not os.path.exists(FIREBASE_WEB_CONFIG_PATH):
-        return None
-    try:
-        with open(FIREBASE_WEB_CONFIG_PATH) as f:
-            cfg = json.load(f)
-        if cfg.get("apiKey") and cfg.get("apiKey") != "YOUR_API_KEY":
-            return cfg
-    except Exception:
-        pass
+    cfg_json = os.environ.get("FIREBASE_WEB_CONFIG_JSON")
+    if cfg_json:
+        try:
+            cfg = json.loads(cfg_json)
+            if cfg.get("apiKey") and cfg.get("apiKey") != "YOUR_API_KEY":
+                return cfg
+        except Exception:
+            pass
+    if os.path.exists(FIREBASE_WEB_CONFIG_PATH):
+        try:
+            with open(FIREBASE_WEB_CONFIG_PATH) as f:
+                cfg = json.load(f)
+            if cfg.get("apiKey") and cfg.get("apiKey") != "YOUR_API_KEY":
+                return cfg
+        except Exception:
+            pass
     return None
-DB_PATH = os.path.join(APP_DIR, "app.db")
+
+DB_PATH = os.path.join("/tmp" if IS_VERCEL else APP_DIR, "app.db")
 DATA_DIR = os.path.join(APP_DIR, "data")
 
 app = Flask(
@@ -53,7 +67,7 @@ app = Flask(
     template_folder=os.path.join(APP_DIR, "templates"),
     static_url_path="/static"
 )
-app.secret_key = "dev-change-me"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-change-me")
 
 SUBJECTS = ["Mathematics", "English", "Science"]
 
