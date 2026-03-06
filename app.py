@@ -296,8 +296,6 @@ def _ensure_db():
 def require_login():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    if session.get("needs_age_pick") and request.endpoint not in ("ask_age", "ask_age_post"):
-        return redirect(url_for("ask_age"))
     return None
 
 
@@ -1054,9 +1052,9 @@ def choose_grade():
     guard = require_login()
     if guard:
         return guard
-    if not session.get("subject"):
-        return redirect(url_for("choose_subject"))
     if not session.get("needs_grade_pick"):
+        if not session.get("subject"):
+            return redirect(url_for("choose_subject"))
         return redirect(url_for("stages"))
     return render_template("choose_grade.html")
 
@@ -1075,7 +1073,8 @@ def choose_grade_post():
     db.commit()
 
     session.pop("needs_grade_pick", None)
-    return redirect(url_for("stages"))
+    flash("Thanks! Let's get started.")
+    return redirect(url_for("choose_subject"))
 
 
 @app.get("/choose-subject")
@@ -1085,6 +1084,8 @@ def choose_subject():
         return guard
     if session.get("role") != "student":
         return redirect(url_for("stages"))
+    if session.get("needs_grade_pick"):
+        return redirect(url_for("choose_grade"))
     return render_template("choose_subject.html", subjects=STAGE_SUBJECTS)
 
 
@@ -1098,8 +1099,6 @@ def choose_subject_post():
         subject = STAGE_SUBJECTS[0]
     session["subject"] = subject
     flash("Let's start learning " + subject + " 🌿")
-    if session.get("needs_grade_pick"):
-        return redirect(url_for("choose_grade"))
     return redirect(url_for("stages"))
 
 
@@ -1160,17 +1159,9 @@ def auth_firebase():
         else:
             user_id = db.execute("SELECT id FROM users WHERE firebase_uid=?", (firebase_uid,)).fetchone()["id"]
 
-    try:
-        row = db.execute("SELECT grade, role, age FROM users WHERE id=?", (user_id,)).fetchone()
-    except sqlite3.OperationalError:
-        row = db.execute("SELECT grade, role FROM users WHERE id=?", (user_id,)).fetchone()
+    row = db.execute("SELECT grade, role FROM users WHERE id=?", (user_id,)).fetchone()
     session["user_id"] = int(user_id)
     session["role"] = (row["role"] if row["role"] else "student")
-
-    age_val = row["age"] if "age" in row.keys() else None
-    if age_val is None:
-        session["needs_age_pick"] = True
-        return jsonify({"redirect": url_for("ask_age")})
 
     if session["role"] == "teacher":
         return jsonify({"redirect": url_for("teacher_dashboard")})
@@ -1178,50 +1169,8 @@ def auth_firebase():
         return jsonify({"redirect": url_for("parent_dashboard")})
     if not row["grade"]:
         session["needs_grade_pick"] = True
-        return jsonify({"redirect": url_for("choose_subject")})
+        return jsonify({"redirect": url_for("choose_grade")})
     return jsonify({"redirect": url_for("stages")})
-
-
-@app.get("/ask-age")
-def ask_age():
-    guard = require_login()
-    if guard:
-        return guard
-    if not session.get("needs_age_pick"):
-        return redirect(_redirect_after_age())
-    return render_template("ask_age.html")
-
-
-@app.post("/ask-age")
-def ask_age_post():
-    guard = require_login()
-    if guard:
-        return guard
-    age_str = (request.form.get("age") or "").strip()
-    try:
-        age = int(age_str)
-        if age < 3 or age > 120:
-            flash("Please enter an age between 3 and 120.")
-            return redirect(url_for("ask_age"))
-    except ValueError:
-        flash("Please enter a valid number.")
-        return redirect(url_for("ask_age"))
-    db = get_db()
-    db.execute("UPDATE users SET age=? WHERE id=?", (age, session["user_id"]))
-    db.commit()
-    session.pop("needs_age_pick", None)
-    flash("Thanks! Let's get started.")
-    return redirect(_redirect_after_age())
-
-
-def _redirect_after_age():
-    if session.get("role") == "teacher":
-        return url_for("teacher_dashboard")
-    if session.get("role") == "parent":
-        return url_for("parent_dashboard")
-    if session.get("needs_grade_pick"):
-        return url_for("choose_subject")
-    return url_for("stages")
 
 
 @app.get("/logout")
@@ -1241,10 +1190,10 @@ def stages():
     if session.get("role") == "parent":
         return redirect(url_for("parent_dashboard"))
 
-    if not session.get("subject"):
-        return redirect(url_for("choose_subject"))
     if session.get("needs_grade_pick"):
         return redirect(url_for("choose_grade"))
+    if not session.get("subject"):
+        return redirect(url_for("choose_subject"))
 
     user_id = session["user_id"]
     grade = get_user_grade(user_id)
