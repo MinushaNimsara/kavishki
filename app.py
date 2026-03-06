@@ -1171,6 +1171,9 @@ def auth_firebase():
     if not row["grade"]:
         session["needs_grade_pick"] = True
         return jsonify({"redirect": url_for("ask_grade")})
+    # Students: show grade screen first, then subject
+    if session["role"] == "student":
+        return jsonify({"redirect": url_for("ask_grade")})
     return jsonify({"redirect": url_for("stages")})
 
 
