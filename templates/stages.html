@@ -9,7 +9,10 @@
         Grade {{ grade }} • {{ subject }} • Streak {{ streak }} day(s)
       </div>
     </div>
-    <a class="btn outline small" href="{{ url_for('choose_subject') }}">Change subject</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="btn outline small" href="{{ url_for('ask_grade') }}">Change grade</a>
+      <a class="btn outline small" href="{{ url_for('choose_subject') }}">Change subject</a>
+    </div>
   </div>
 </section>
 

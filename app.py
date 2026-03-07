@@ -308,6 +308,15 @@ def get_user_grade(user_id: int) -> int:
     return int(row["grade"]) if row and row["grade"] else 1
 
 
+def get_effective_grade(user_id: int) -> int:
+    """Use session grade if set (persists across ephemeral DB), else DB."""
+    if "grade" in session and session["grade"] in (1, 2, 3, 4, 5):
+        return int(session["grade"])
+    grade = get_user_grade(user_id)
+    session["grade"] = grade  # Sync session for future requests
+    return grade
+
+
 STAGES = ["easy", "medium", "hard"]
 
 
@@ -1136,7 +1145,7 @@ def choose_grade_post():
     db = get_db()
     db.execute("UPDATE users SET grade=? WHERE id=?", (grade, session["user_id"]))
     db.commit()
-
+    session["grade"] = grade  # Persist in session (handles ephemeral DB e.g. Vercel)
     session.pop("needs_grade_pick", None)
     return redirect(url_for("stages"))
 
@@ -1226,6 +1235,8 @@ def auth_firebase():
     row = db.execute("SELECT grade, role FROM users WHERE id=?", (user_id,)).fetchone()
     session["user_id"] = int(user_id)
     session["role"] = (row["role"] if row["role"] else "student")
+    if row and row["grade"]:
+        session["grade"] = int(row["grade"])
 
     if session["role"] == "teacher":
         return jsonify({"redirect": url_for("teacher_dashboard")})
@@ -1247,11 +1258,9 @@ def ask_grade():
         return guard
     if session.get("role") != "student":
         return redirect(url_for("stages"))
-    # If they already have subject, go to stages. Otherwise show grade (grade before subject).
-    if session.get("subject"):
-        return redirect(url_for("stages"))
+    # Show grade picker (for first-time or "Change grade")
     user_id = session["user_id"]
-    grade = get_user_grade(user_id) or 1
+    grade = get_effective_grade(user_id)
     return render_template("ask_grade.html", current_grade=grade)
 
 
@@ -1268,8 +1277,11 @@ def ask_grade_post():
     db = get_db()
     db.execute("UPDATE users SET grade=? WHERE id=?", (grade, session["user_id"]))
     db.commit()
+    session["grade"] = grade  # Persist in session (handles ephemeral DB e.g. Vercel)
     session.pop("needs_grade_pick", None)
-    flash("Thanks! Let's get started.")
+    flash("Grade updated! You'll get Grade " + str(grade) + " questions.")
+    if session.get("subject"):
+        return redirect(url_for("stages"))
     return redirect(url_for("choose_subject"))
 
 
@@ -1296,7 +1308,7 @@ def stages():
         return redirect(url_for("ask_grade"))
 
     user_id = session["user_id"]
-    grade = get_user_grade(user_id)
+    grade = get_effective_grade(user_id)
     db = get_db()
     user = db.execute("SELECT nickname, grade, xp FROM users WHERE id=?", (user_id,)).fetchone()
     streak = get_streak(user_id)
@@ -1348,7 +1360,7 @@ def stage_quiz(stage_name: str):
         flash("Complete the previous stage first to unlock this one.")
         return redirect(url_for("stages"))
 
-    grade = get_user_grade(user_id)
+    grade = get_effective_grade(user_id)
     n_questions = 5 if stage_name == "easy" else 10
     questions = get_stage_questions(grade, subject, stage_name, n=n_questions)
     if not questions:
